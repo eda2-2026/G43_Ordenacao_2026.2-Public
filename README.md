@@ -104,6 +104,24 @@ result = sort_products(products, algorithm="merge", count_comparisons=False)
 
 Nesse caso, `result.comparisons` é `None`. O gerador aceita quantidades entre 0 e 1.000; uma quantidade zero produz uma lista vazia.
 
+## Testes
+
+Instale as dependências de desenvolvimento no ambiente virtual:
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+Execute a suíte a partir da pasta do projeto:
+
+```bash
+python -m pytest -q
+```
+
+Os testes verificam a corretude dos algoritmos usando `sorted()` como referência, a estabilidade nos empates, a preservação da entrada e a contagem de comparações. Também cobrem a geração reproduzível dos quatro formatos, entradas de até 1.000 produtos, validações e formatação monetária.
+
+Cada algoritmo é validado sobre as 1.093 combinações de listas de até seis elementos com três preços possíveis, incluindo entradas vazias e empates.
+
 ## Estrutura
 
 ```text
@@ -116,6 +134,12 @@ models/
 services/
   generator.py          Geração dos quatro formatos de entrada
   catalog.py            Ordenação e comparação de produtos
+tests/
+  test_algorithms.py    Corretude, estabilidade e contagem de comparações
+  test_catalog.py       Integração e preservação dos produtos
+  test_generator.py     Formatos de entrada e reprodução dos dados
+  test_product.py       Validação e formatação monetária
 app.py                  Página de apresentação Streamlit
 requirements.txt        Dependência da interface
+requirements-dev.txt    Dependências de desenvolvimento
 ```
