@@ -4,6 +4,16 @@ Trabalho 2 da disciplina de Estruturas de Dados 2, desenvolvido individualmente 
 
 O projeto implementa **Insertion Sort** e **Merge Sort** para ordenar produtos por preço e comparar a quantidade de comparações e o tempo de ordenação. A interface Streamlit permite gerar as entradas e visualizar os resultados lado a lado.
 
+## Vídeo de apresentação
+
+Link a ser adicionado.
+
+## Alunos
+
+| Matrícula | Nome |
+| --------- | ---- |
+| 231011097 | André Ricardo Meyer de Melo |
+
 ## Funcionalidades
 
 - Modelo de produto com identificador, nome e preço em centavos inteiros.
