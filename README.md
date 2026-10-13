@@ -2,42 +2,35 @@
 
 Trabalho 2 da disciplina de Estruturas de Dados 2, desenvolvido individualmente em Python.
 
-O projeto compara **Insertion Sort** e **Merge Sort**, implementados manualmente, na ordenação crescente de produtos por preço. A interface será construída em uma única página com Streamlit.
+O projeto implementa **Insertion Sort** e **Merge Sort** para ordenar produtos por preço e comparar a quantidade de comparações entre os algoritmos. A página Streamlit apresenta o tema e as características dos métodos.
 
-## Estado atual
+## Funcionalidades
 
-Esta primeira etapa entrega a estrutura do projeto, a definição do escopo, as dependências e uma página inicial executável. Os algoritmos, a geração de produtos, os testes e o benchmark ainda serão implementados.
+- Modelo de produto com identificador, nome e preço em centavos inteiros.
+- Geração reproduzível de até 1.000 produtos fictícios a partir de uma semente.
+- Quatro formatos de entrada: aleatória, ordenada, invertida e quase ordenada.
+- Ordenação crescente por preço, com preservação da ordem relativa nos empates.
+- Comparação dos algoritmos sobre a mesma entrada, sem modificar a lista original.
+- Contagem opcional das comparações de preço realizadas por cada algoritmo.
 
-## Objetivo
+## Algoritmos
 
-Investigar como o tamanho e a organização da entrada afetam o desempenho dos algoritmos, comparando o tempo de ordenação e a quantidade de comparações. Também será verificada a preservação da ordem relativa dos produtos com preços iguais.
+| Algoritmo | Melhor caso | Caso médio | Pior caso | Memória auxiliar | Estável |
+| --- | --- | --- | --- | --- | --- |
+| Insertion Sort | Θ(n) | Θ(n²) | Θ(n²) | O(1)* | Sim |
+| Merge Sort | Θ(n log n) | Θ(n log n) | Θ(n log n) | O(n) | Sim |
 
-## Escopo
+\* O Insertion Sort utiliza espaço constante para ordenar, além da cópia de O(n) elementos feita para preservar a entrada. As duas funções retornam uma nova lista.
 
-- Cada produto terá identificador, nome e preço em centavos inteiros.
-- A ordenação será crescente, utilizando somente o preço como chave.
-- O usuário poderá gerar entre 10 e 1.000 produtos fictícios.
-- Haverá quatro formatos de entrada: aleatória, ordenada, invertida e quase ordenada.
-- Ambos os algoritmos receberão cópias da mesma entrada.
-- A interface exibirá a lista original, os resultados e as métricas.
-- A geração utilizará uma semente para permitir a reprodução dos cenários.
+Somente o preço é utilizado como chave de ordenação. O identificador distingue os produtos e não é usado como critério de desempate.
 
-Esta versão não inclui banco de dados, autenticação, APIs, importação de arquivos ou animações da execução.
-
-## Algoritmos planejados
-
-| Algoritmo | Melhor caso | Caso médio | Pior caso | Estabilidade prevista |
-| --- | --- | --- | --- | --- |
-| Insertion Sort | Θ(n) | Θ(n²) | Θ(n²) | Estável |
-| Merge Sort | Θ(n log n) | Θ(n log n) | Θ(n log n) | Estável |
-
-As implementações preservarão a ordem relativa nos empates. O identificador servirá para distinguir os produtos, sem funcionar como critério de desempate.
+Uma comparação corresponde à avaliação entre duas chaves de preço. Verificações de índices e condições de laço não entram nessa contagem.
 
 ## Como executar
 
-Requisito: Python 3.11 ou superior. A primeira etapa foi verificada com Python 3.14.3 e Streamlit 1.62.0.
+Requisito: Python 3.11 ou superior.
 
-Execute os comandos a partir da pasta `G43_Ordenacao_2026.2`.
+Execute os comandos a partir da pasta do projeto.
 
 Crie um ambiente virtual:
 
@@ -57,14 +50,14 @@ No Linux ou macOS:
 source .venv/bin/activate
 ```
 
-Instale a dependência e inicie a aplicação:
+Instale a dependência e inicie a página de apresentação:
 
 ```bash
 python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-Abra o endereço local informado pelo Streamlit no terminal. Nesta etapa, a aplicação apresenta o tema e o planejamento do trabalho.
+Abra o endereço local informado pelo Streamlit no terminal.
 
 Se preferir executar no PowerShell sem ativar o ambiente virtual:
 
@@ -73,46 +66,56 @@ Se preferir executar no PowerShell sem ativar o ambiente virtual:
 .\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
+## Usar a ordenação em Python
+
+O núcleo de ordenação utiliza somente a biblioteca padrão. No terminal, execute `python` a partir da pasta do projeto e use:
+
+```python
+from services.generator import generate_products
+from services.catalog import compare_products
+
+products = generate_products(10, scenario="random", seed=43)
+insertion, merge = compare_products(products)
+
+for result in (insertion, merge):
+    print(result.algorithm, "— comparações:", result.comparisons)
+    for product in result.products:
+        print(product.identifier, product.name, product.formatted_price)
+```
+
+Os formatos aceitos pelo gerador são:
+
+| Valor de `scenario` | Formato |
+| --- | --- |
+| `random` | Preços gerados em ordem aleatória |
+| `ordered` | Preços em ordem crescente |
+| `reversed` | Preços em ordem decrescente |
+| `nearly_ordered` | Lista crescente com uma troca entre vizinhos a cada 20 posições |
+
+Para uma mesma quantidade e semente, os quatro formatos contêm os mesmos produtos. A preparação das entradas ordenadas utiliza o próprio Merge Sort.
+
+Para ordenar com um algoritmo específico, sem contar comparações:
+
+```python
+from services.catalog import sort_products
+
+result = sort_products(products, algorithm="merge", count_comparisons=False)
+```
+
+Nesse caso, `result.comparisons` é `None`. O gerador aceita quantidades entre 0 e 1.000; uma quantidade zero produz uma lista vazia.
+
 ## Estrutura
 
 ```text
-G43_Ordenacao_2026.2/
-├── algorithms/         # Implementações manuais dos algoritmos
-├── models/             # Modelo de produto
-├── services/           # Geração de entradas e integração dos algoritmos
-├── tests/              # Testes de corretude e estabilidade
-├── benchmark/          # Experimentos de desempenho
-├── app.py              # Página da aplicação Streamlit
-├── requirements.txt    # Dependência da interface
-├── .gitignore
-└── README.md
+algorithms/
+  insertion_sort.py     Insertion Sort estável
+  merge_sort.py         Merge Sort estável
+  metrics.py            Contagem de comparações
+models/
+  product.py            Modelo e formatação de preços
+services/
+  generator.py          Geração dos quatro formatos de entrada
+  catalog.py            Ordenação e comparação de produtos
+app.py                  Página de apresentação Streamlit
+requirements.txt        Dependência da interface
 ```
-
-As pastas estão reservadas para as próximas etapas e ainda não contêm as funcionalidades descritas.
-
-## Plano de desenvolvimento e commits
-
-1. **`chore: iniciar estrutura do grupo 43`** — Estrutura, página inicial, dependência e documentação do escopo.
-2. **`feat: implementar ordenacao de produtos`** — Modelo, geração dos quatro formatos de entrada, Insertion Sort e Merge Sort.
-3. **`test: validar algoritmos de ordenacao`** — Testes com listas vazias, unitárias, empates e diferentes formatos de entrada; preservação dos produtos e da entrada original.
-4. **`feat: adicionar interface comparativa`** — Controles de geração, visualização das listas e quantidade de comparações.
-5. **`feat: adicionar benchmark e documentar resultados`** — Medição dos tempos, apresentação dos resultados e documentação final.
-
-Cada commit será feito quando sua etapa estiver implementada e verificada.
-
-## Metodologia prevista
-
-O benchmark comparará entradas de 100, 500 e 1.000 produtos, nos quatro formatos, com cinco repetições e registro da mediana. A geração dos dados e a renderização da interface ficarão fora do tempo medido.
-
-A contagem de comparações será executada separadamente das medições de tempo para reduzir a interferência da instrumentação. `sorted()` será utilizado como referência nos testes, sem substituir as implementações manuais na aplicação.
-
-Não há resultados de desempenho nesta etapa.
-
-## Critérios de conclusão
-
-- Os dois algoritmos produzem preços em ordem crescente, sem perder ou duplicar produtos.
-- A entrada original permanece intacta após a ordenação.
-- Produtos com preços iguais preservam a ordem relativa da entrada.
-- Os casos extremos e os quatro formatos de entrada são validados por testes.
-- A aplicação permite comparar os dois algoritmos sobre os mesmos dados.
-- O README final registra a execução, a metodologia, os resultados medidos e suas limitações.

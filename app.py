@@ -14,16 +14,16 @@ def main() -> None:
     st.caption("Estruturas de Dados 2 · Trabalho 2: Ordenação · Grupo 43")
 
     st.write(
-        "Este projeto vai comparar Insertion Sort e Merge Sort na ordenação "
+        "Este projeto compara Insertion Sort e Merge Sort na ordenação "
         "de produtos por preço, usando a mesma lista de entrada para os dois algoritmos."
     )
 
     st.info(
-        "Etapa 1: estrutura inicial concluída. A geração de produtos, "
-        "os algoritmos e a comparação serão adicionados nas próximas etapas."
+        "A ordenação é crescente por preço. Produtos com o mesmo preço "
+        "mantêm sua ordem relativa na entrada."
     )
 
-    st.subheader("O que vamos investigar?")
+    st.subheader("O que influencia a ordenação?")
     st.markdown(
         "- Como a quantidade de produtos afeta a ordenação.\n"
         "- Como listas aleatórias, ordenadas, invertidas e quase ordenadas "
@@ -31,7 +31,7 @@ def main() -> None:
         "- Se produtos com o mesmo preço mantêm a ordem relativa da entrada."
     )
 
-    st.subheader("Algoritmos previstos")
+    st.subheader("Algoritmos")
     insertion, merge = st.columns(2)
     with insertion:
         st.markdown("**Insertion Sort**")
