@@ -2,7 +2,7 @@
 
 Trabalho 2 da disciplina de Estruturas de Dados 2, desenvolvido individualmente em Python.
 
-O projeto implementa **Insertion Sort** e **Merge Sort** para ordenar produtos por preço e comparar a quantidade de comparações entre os algoritmos. A página Streamlit apresenta o tema e as características dos métodos.
+O projeto implementa **Insertion Sort** e **Merge Sort** para ordenar produtos por preço e comparar a quantidade de comparações entre os algoritmos. A interface Streamlit permite gerar as entradas e visualizar os resultados lado a lado.
 
 ## Funcionalidades
 
@@ -12,6 +12,7 @@ O projeto implementa **Insertion Sort** e **Merge Sort** para ordenar produtos p
 - Ordenação crescente por preço, com preservação da ordem relativa nos empates.
 - Comparação dos algoritmos sobre a mesma entrada, sem modificar a lista original.
 - Contagem opcional das comparações de preço realizadas por cada algoritmo.
+- Interface com controles de quantidade, formato e semente, tabelas e gráfico de comparações.
 
 ## Algoritmos
 
@@ -50,7 +51,7 @@ No Linux ou macOS:
 source .venv/bin/activate
 ```
 
-Instale a dependência e inicie a página de apresentação:
+Instale a dependência e inicie a aplicação:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -65,6 +66,16 @@ Se preferir executar no PowerShell sem ativar o ambiente virtual:
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m streamlit run app.py
 ```
+
+## Usar a interface
+
+1. Escolha entre 10 e 1.000 produtos, o formato da entrada e uma semente.
+2. Clique em **Comparar algoritmos** para atualizar os resultados.
+3. Abra **Lista original** para consultar a entrada e compare as duas tabelas ordenadas.
+
+A página apresenta uma comparação inicial com 20 produtos. O resumo acima das tabelas identifica a configuração dos resultados exibidos. Alterações nos controles são aplicadas ao clicar no botão.
+
+As métricas e o gráfico mostram comparações de preço, não tempo de execução. A coluna **Ordem original** identifica a posição do produto na entrada e permite verificar a preservação dos empates.
 
 ## Usar a ordenação em Python
 
@@ -122,6 +133,8 @@ Os testes verificam a corretude dos algoritmos usando `sorted()` como referênci
 
 Cada algoritmo é validado sobre as 1.093 combinações de listas de até seis elementos com três preços possíveis, incluindo entradas vazias e empates.
 
+Os testes da interface utilizam o Streamlit AppTest para validar o carregamento inicial, os quatro formatos de entrada, a atualização das tabelas e das métricas, e a manutenção dos resultados até o envio do formulário.
+
 ## Estrutura
 
 ```text
@@ -135,11 +148,12 @@ services/
   generator.py          Geração dos quatro formatos de entrada
   catalog.py            Ordenação e comparação de produtos
 tests/
+  test_app.py           Integração da interface Streamlit
   test_algorithms.py    Corretude, estabilidade e contagem de comparações
   test_catalog.py       Integração e preservação dos produtos
   test_generator.py     Formatos de entrada e reprodução dos dados
   test_product.py       Validação e formatação monetária
-app.py                  Página de apresentação Streamlit
+app.py                  Interface comparativa Streamlit
 requirements.txt        Dependência da interface
 requirements-dev.txt    Dependências de desenvolvimento
 ```
