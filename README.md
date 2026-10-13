@@ -2,7 +2,7 @@
 
 Trabalho 2 da disciplina de Estruturas de Dados 2, desenvolvido individualmente em Python.
 
-O projeto implementa **Insertion Sort** e **Merge Sort** para ordenar produtos por preço e comparar a quantidade de comparações entre os algoritmos. A interface Streamlit permite gerar as entradas e visualizar os resultados lado a lado.
+O projeto implementa **Insertion Sort** e **Merge Sort** para ordenar produtos por preço e comparar a quantidade de comparações e o tempo de ordenação. A interface Streamlit permite gerar as entradas e visualizar os resultados lado a lado.
 
 ## Funcionalidades
 
@@ -13,6 +13,7 @@ O projeto implementa **Insertion Sort** e **Merge Sort** para ordenar produtos p
 - Comparação dos algoritmos sobre a mesma entrada, sem modificar a lista original.
 - Contagem opcional das comparações de preço realizadas por cada algoritmo.
 - Interface com controles de quantidade, formato e semente, tabelas e gráfico de comparações.
+- Benchmark com medições repetidas, mediana dos tempos, gráfico e exportação em CSV.
 
 ## Algoritmos
 
@@ -77,6 +78,8 @@ A página apresenta uma comparação inicial com 20 produtos. O resumo acima das
 
 As métricas e o gráfico mostram comparações de preço, não tempo de execução. A coluna **Ordem original** identifica a posição do produto na entrada e permite verificar a preservação dos empates.
 
+Na seção **Benchmark de desempenho**, escolha a quantidade de repetições e a semente, e clique em **Executar benchmark**. A tabela contém os dois algoritmos para 100, 500 e 1.000 produtos nos quatro formatos de entrada. Selecione um formato para consultar o gráfico de tempos e use **Baixar resultados em CSV** para exportar as medições. O benchmark é independente dos controles do catálogo.
+
 ## Usar a ordenação em Python
 
 O núcleo de ordenação utiliza somente a biblioteca padrão. No terminal, execute `python` a partir da pasta do projeto e use:
@@ -115,6 +118,66 @@ result = sort_products(products, algorithm="merge", count_comparisons=False)
 
 Nesse caso, `result.comparisons` é `None`. O gerador aceita quantidades entre 0 e 1.000; uma quantidade zero produz uma lista vazia.
 
+## Executar o benchmark no terminal
+
+O benchmark utiliza somente a biblioteca padrão do Python. Para executar os três tamanhos com cinco repetições e semente 43:
+
+```bash
+python -m benchmark
+```
+
+Para salvar os resultados e as amostras individuais em CSV:
+
+```bash
+python -m benchmark --csv benchmark/results.csv
+```
+
+É possível configurar os tamanhos, as repetições e a semente:
+
+```bash
+python -m benchmark --sizes 100 500 1000 --repetitions 7 --seed 43
+```
+
+O comando aceita tamanhos de 1 a 1.000, sem duplicatas, e de 1 a 100 repetições. A interface limita as repetições a 15.
+
+## Metodologia do benchmark
+
+- Os algoritmos recebem a mesma lista de produtos para cada tamanho e formato.
+- Cada algoritmo realiza uma execução de aquecimento antes das medições.
+- O tempo é medido com `time.perf_counter_ns()` e convertido para milissegundos.
+- O intervalo medido inclui a função de ordenação e a cópia da entrada feita por ela.
+- A geração dos produtos, a interface, a liberação da lista resultante e a contagem de comparações ficam fora desse intervalo.
+- A contagem de comparações é obtida em uma execução separada, sobre a mesma entrada.
+- A ordem de execução dos algoritmos alterna entre as repetições.
+- O resultado é a mediana dos tempos. O CSV também registra todas as amostras individuais.
+
+A semente reproduz os dados, mas não os tempos. Carga do sistema, ambiente de execução e características do computador afetam as medições. O experimento compara estas implementações em Python; os tempos, isoladamente, não demonstram a complexidade assintótica.
+
+## Resultados medidos
+
+Execução em **12/10/2026**, com **CPython 3.14.3**, **Windows AMD64**, semente **43**, **cinco repetições** e um aquecimento por algoritmo. Os resultados foram coletados no ambiente automatizado local de desenvolvimento.
+
+Os valores abaixo são medianas em milissegundos. As amostras e as contagens completas estão em [benchmark/results.csv](benchmark/results.csv).
+
+| Produtos | Entrada | Insertion Sort (ms) | Merge Sort (ms) |
+| --- | --- | ---: | ---: |
+| 100 | Aleatória | 0.5058 | 0.3324 |
+| 100 | Ordenada | 0.0321 | 0.2474 |
+| 100 | Invertida | 0.6474 | 0.1848 |
+| 100 | Quase ordenada | 0.0199 | 0.1569 |
+| 500 | Aleatória | 11.5503 | 1.9590 |
+| 500 | Ordenada | 0.2388 | 2.2634 |
+| 500 | Invertida | 23.3338 | 1.8068 |
+| 500 | Quase ordenada | 0.2049 | 1.7736 |
+| 1000 | Aleatória | 57.7413 | 6.1516 |
+| 1000 | Ordenada | 0.3105 | 2.5049 |
+| 1000 | Invertida | 171.6617 | 5.2248 |
+| 1000 | Quase ordenada | 0.3675 | 3.5304 |
+
+Nesta execução, Insertion Sort apresentou as menores medianas nas entradas ordenadas e quase ordenadas. Merge Sort apresentou as menores medianas nas entradas aleatórias e invertidas, para os três tamanhos.
+
+Com 1.000 produtos, Insertion Sort realizou **999 comparações** na entrada ordenada e **499.500** na invertida. Merge Sort realizou **4.932** e **5.048**, respectivamente. Essas contagens ajudam a explicar a influência do formato da entrada. Diferenças pequenas de tempo podem sofrer influência do ruído do sistema, mesmo usando a mediana.
+
 ## Testes
 
 Instale as dependências de desenvolvimento no ambiente virtual:
@@ -135,6 +198,8 @@ Cada algoritmo é validado sobre as 1.093 combinações de listas de até seis e
 
 Os testes da interface utilizam o Streamlit AppTest para validar o carregamento inicial, os quatro formatos de entrada, a atualização das tabelas e das métricas, e a manutenção dos resultados até o envio do formulário.
 
+Os testes do benchmark verificam a cobertura dos cenários, o cálculo da mediana com relógio controlado, a alternância de execução, a separação entre medição e contagem de comparações, a exportação CSV e a execução pela interface.
+
 ## Estrutura
 
 ```text
@@ -147,9 +212,14 @@ models/
 services/
   generator.py          Geração dos quatro formatos de entrada
   catalog.py            Ordenação e comparação de produtos
+benchmark/
+  __main__.py           Execução pelo terminal
+  runner.py             Medições e exportação CSV
+  results.csv           Resultados e amostras da execução documentada
 tests/
   test_app.py           Integração da interface Streamlit
   test_algorithms.py    Corretude, estabilidade e contagem de comparações
+  test_benchmark.py     Metodologia, métricas e exportação
   test_catalog.py       Integração e preservação dos produtos
   test_generator.py     Formatos de entrada e reprodução dos dados
   test_product.py       Validação e formatação monetária

@@ -22,9 +22,9 @@ def assert_displayed_results(app, quantity, scenario, seed):
     expected = sorted(products, key=lambda product: product.price_cents)
     positions = {product.identifier: index for index, product in enumerate(products, start=1)}
 
-    assert len(app.dataframe) == 3
+    assert len(app.dataframe) >= 3
     assert app.dataframe[0].value["ID"].tolist() == [product.identifier for product in products]
-    for table in app.dataframe[1:]:
+    for table in app.dataframe[1:3]:
         assert table.value["ID"].tolist() == [product.identifier for product in expected]
         assert table.value["Preço"].tolist() == [product.formatted_price for product in expected]
         assert table.value["Ordem original"].tolist() == [positions[product.identifier] for product in expected]
@@ -71,3 +71,37 @@ def test_repeating_a_comparison_does_not_accumulate_metrics(app):
     assert not app.exception
     assert [metric.value for metric in app.metric] == first
     assert_displayed_results(app, 20, "random", 43)
+
+
+def test_benchmark_runs_on_request_and_preserves_catalog_results(app):
+    assert len(app.dataframe) == 3
+    app.number_input(key="benchmark_repetitions").set_value(1)
+    app.number_input(key="benchmark_seed").set_value(44)
+    app.button[1].click().run(timeout=20)
+
+    assert_displayed_results(app, 20, "random", 43)
+    assert len(app.dataframe) == 4
+    table = app.dataframe[3].value
+    assert len(table) == 24
+    assert set(table["Produtos"]) == {100, 500, 1000}
+    assert set(table["Algoritmo"]) == {"Insertion Sort", "Merge Sort"}
+    assert (table["Mediana (ms)"] >= 0).all()
+    assert any("1 repetição" in caption.value and "Semente 44" in caption.value for caption in app.caption)
+
+    original = table.copy()
+    app.selectbox(key="benchmark_chart_scenario").set_value("ordered").run()
+    assert not app.exception
+    assert app.dataframe[3].value.equals(original)
+
+
+def test_editing_benchmark_controls_does_not_replace_saved_measurements(app):
+    app.number_input(key="benchmark_repetitions").set_value(1)
+    app.button[1].click().run(timeout=20)
+    original = app.dataframe[3].value.copy()
+
+    app.number_input(key="benchmark_seed").set_value(123)
+    app.run()
+
+    assert not app.exception
+    assert app.dataframe[3].value.equals(original)
+    assert any("Benchmark exibido:" in caption.value and "Semente 43" in caption.value for caption in app.caption)
